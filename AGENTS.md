@@ -27,7 +27,48 @@ If you add or update dependencies remember to:
 * Co-locate component-specific styles in the same folder as the component when
   practical.
 
-## 4. Useful Commands Recap
+## 4. Linting
+
+Run ESLint before committing or submitting changes:
+
+```bash
+npm run lint
+# or
+pnpm lint
+```
+
+Fix any reported errors or warnings before pushing. Linting checks TypeScript types and
+code style across the project.
+
+## 5. Testing
+
+If a test suite is present, run it to verify your changes don't break existing behaviour:
+
+```bash
+npm run test
+# or
+pnpm test
+```
+
+* Add or update tests for any code you change.
+* All tests must pass before merging.
+
+## 6. Branch Naming
+
+Use descriptive, lowercase, hyphen-separated branch names that reflect the scope of
+work:
+
+```
+<type>/<short-description>
+```
+
+Examples:
+* `feat/add-faq-section`
+* `fix/hero-layout-mobile`
+* `docs/update-agents-md`
+* `chore/update-dependencies`
+
+## 7. Useful Commands Recap
 
 | Command            | Purpose                                            |
 | ------------------ | -------------------------------------------------- |
@@ -35,6 +76,7 @@ If you add or update dependencies remember to:
 | `npm run lint`     | Run ESLint checks.                                 |
 | `npm run test`     | Execute the test suite (if present).               |
 | `npm run build`    | **Production build – _do not run during agent sessions_** |
+| `pnpm install`     | Install / sync dependencies.                       |
 
 ---
 
