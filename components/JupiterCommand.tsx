@@ -61,6 +61,10 @@ const CATEGORY_LABELS: Record<PlatformCategory, string> = {
   ecommerce: "E-Commerce",
 };
 
+// ─── Payment destination ──────────────────────────────────────────────────────
+
+const PAYMENT_DESTINATION = "$julianshadell";
+
 // ─── Built-in commands ────────────────────────────────────────────────────────
 
 const COMMANDS: Record<string, (args: string[]) => string[]> = {
@@ -73,6 +77,8 @@ const COMMANDS: Record<string, (args: string[]) => string[]> = {
     "  platforms [category]     List payment & social platforms",
     "  connect <platform>       Connect a platform integration",
     "  disconnect <platform>    Disconnect a platform integration",
+    "  pay <amount> [platform]  Send payment to " + PAYMENT_DESTINATION,
+    "  destination              Show the active payment destination",
     "  status                   Show system status",
     "  logs [agent]             View recent logs",
     "  config                   Show current configuration",
@@ -180,12 +186,13 @@ const COMMANDS: Record<string, (args: string[]) => string[]> = {
   config: () => [
     "Current configuration:",
     "─────────────────────────────────────────────────",
-    "  agents_file     AGENTS.md",
-    "  log_level       info",
-    "  max_concurrency 3",
-    "  timeout         300s",
-    "  output_dir      ./output",
-    "  format          markdown",
+    "  agents_file         AGENTS.md",
+    "  log_level           info",
+    "  max_concurrency     3",
+    "  timeout             300s",
+    "  output_dir          ./output",
+    "  format              markdown",
+    "  payment_destination " + PAYMENT_DESTINATION,
   ],
   logs: (args) => {
     const agent = args[0];
@@ -221,17 +228,66 @@ const COMMANDS: Record<string, (args: string[]) => string[]> = {
       `Task queued. Run \`logs ${agent}\` to follow progress.`,
     ];
   },
+  destination: () => [
+    "Active payment destination:",
+    "─────────────────────────────────────────────────",
+    "  Handle   " + PAYMENT_DESTINATION,
+    "  Platforms  Cash App · Venmo · PayPal · Coinbase · Kraken",
+    "",
+    "All `pay` commands route to this destination.",
+    "Run `config` to see full configuration.",
+  ],
+  pay: (args) => {
+    const amount = args[0];
+    const platform = args[1]?.toLowerCase();
+
+    if (!amount) {
+      return [
+        "Usage: pay <amount> [platform]",
+        "  Example: pay 50 cashapp",
+        "  Example: pay 0.01eth coinbase",
+        "",
+        "Destination: " + PAYMENT_DESTINATION,
+      ];
+    }
+
+    const supportedPlatforms = [
+      "cashapp", "venmo", "paypal", "stripe", "coinbase",
+      "kraken", "binance", "apple-pay", "google-pay", "square",
+    ];
+
+    if (platform && !supportedPlatforms.includes(platform)) {
+      return [
+        `Error: platform '${platform}' is not configured for payments.`,
+        "Supported: " + supportedPlatforms.join("  "),
+      ];
+    }
+
+    const via = platform ? platform : "default gateway";
+    return [
+      `Initiating payment of ${amount} via ${via}…`,
+      `  Destination:  ${PAYMENT_DESTINATION}`,
+      `  Amount:       ${amount}`,
+      `  Platform:     ${via}`,
+      `  Verifying destination handle…`,
+      `✓ Destination ${PAYMENT_DESTINATION} verified.`,
+      `  Processing transaction…`,
+      `✓ Payment of ${amount} sent to ${PAYMENT_DESTINATION} via ${via}.`,
+      `  Reference ID: JC-${Math.random().toString(36).slice(2, 10).toUpperCase()}`,
+    ];
+  },
   clear: () => ["__CLEAR__"],
 };
 
 // ─── Quick-action shortcuts ───────────────────────────────────────────────────
 
 const QUICK_ACTIONS = [
-  { label: "agents",    icon: "⬡", description: "List agents" },
-  { label: "platforms", icon: "⊞", description: "List integrations" },
-  { label: "status",    icon: "◎", description: "System status" },
-  { label: "logs",      icon: "≡", description: "View logs" },
-  { label: "help",      icon: "?", description: "Help" },
+  { label: "agents",      icon: "⬡", description: "List agents" },
+  { label: "platforms",   icon: "⊞", description: "List integrations" },
+  { label: "destination", icon: "→", description: "Payment destination" },
+  { label: "status",      icon: "◎", description: "System status" },
+  { label: "logs",        icon: "≡", description: "View logs" },
+  { label: "help",        icon: "?", description: "Help" },
 ];
 
 // ─── Component ────────────────────────────────────────────────────────────────
@@ -241,6 +297,10 @@ export default function JupiterCommand() {
     {
       type: "info",
       text: "Jupiter Command v1.0.0 — type `help` to get started.",
+    },
+    {
+      type: "success",
+      text: `✓ Payment destination: ${PAYMENT_DESTINATION}`,
     },
   ]);
   const [input, setInput] = useState("");

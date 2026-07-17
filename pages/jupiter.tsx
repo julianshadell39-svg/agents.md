@@ -3,6 +3,8 @@ import JupiterCommand from "@/components/JupiterCommand";
 import Footer from "@/components/Footer";
 import GitHubIcon from "@/components/icons/GitHubIcon";
 
+const inlineCode = "bg-gray-100 dark:bg-gray-800 px-1 rounded text-xs font-mono";
+
 export default function JupiterPage() {
   return (
     <div className="flex flex-col min-h-screen font-sans">
@@ -83,11 +85,27 @@ export default function JupiterPage() {
               </h2>
               <p className="text-gray-600 dark:text-gray-400 text-sm">
                 Type a command below or click a quick-action button. Try{" "}
-                <code className="bg-gray-100 dark:bg-gray-800 px-1 rounded text-xs">
+                <code className={inlineCode}>
                   help
                 </code>{" "}
                 to see all available commands.
               </p>
+            </div>
+
+            {/* Payment destination banner */}
+            <div className="flex items-center gap-3 px-4 py-3 rounded-lg border border-green-200 dark:border-green-800 bg-green-50 dark:bg-green-950/40">
+              <span className="text-green-600 dark:text-green-400 text-lg" aria-hidden>→</span>
+              <div className="flex flex-col gap-0.5">
+                <span className="text-xs font-medium text-green-700 dark:text-green-300 uppercase tracking-wide">
+                  Active payment destination
+                </span>
+                <code className="text-sm font-mono font-semibold text-green-900 dark:text-green-100">
+                  $julianshadell
+                </code>
+              </div>
+              <span className="ml-auto text-xs text-green-600 dark:text-green-400 font-mono">
+                Cash App · Venmo · PayPal · Coinbase · Kraken
+              </span>
             </div>
 
             <JupiterCommand />
@@ -112,6 +130,22 @@ export default function JupiterPage() {
                   desc: "Dispatch a task to the named agent using your AGENTS.md config.",
                 },
                 {
+                  cmd: "platforms [category]",
+                  desc: "List all payment, crypto, social, and e-commerce platform integrations.",
+                },
+                {
+                  cmd: "connect <platform>",
+                  desc: "Authenticate and connect a platform integration by its ID.",
+                },
+                {
+                  cmd: "destination",
+                  desc: "Show the active payment destination ($julianshadell) and supported platforms.",
+                },
+                {
+                  cmd: "pay <amount> [platform]",
+                  desc: "Send a payment to $julianshadell via Cash App, Venmo, Coinbase, Kraken, and more.",
+                },
+                {
                   cmd: "status",
                   desc: "Show a live overview of the scheduler and all services.",
                 },
@@ -121,7 +155,7 @@ export default function JupiterPage() {
                 },
                 {
                   cmd: "config",
-                  desc: "Display the current active configuration values.",
+                  desc: "Display the current active configuration, including payment_destination.",
                 },
                 {
                   cmd: "help",
@@ -172,8 +206,8 @@ export default function JupiterPage() {
               ))}
             </div>
             <p className="text-xs text-gray-400 dark:text-gray-600">
-              Running <code className="bg-gray-100 dark:bg-gray-800 px-1 rounded">jupiter init</code>{" "}
-              scaffolds an <code className="bg-gray-100 dark:bg-gray-800 px-1 rounded">AGENTS.md</code>{" "}
+              Running <code className={inlineCode}>jupiter init</code>{" "}
+              scaffolds an <code className={inlineCode}>AGENTS.md</code>{" "}
               file in your project root automatically.
             </p>
           </div>
