@@ -10,20 +10,74 @@ type OutputLine =
   | { type: "success"; text: string }
   | { type: "info"; text: string };
 
+// ─── Platform registry ────────────────────────────────────────────────────────
+
+type PlatformCategory = "payment" | "crypto" | "social" | "ecommerce";
+
+interface Platform {
+  id: string;
+  name: string;
+  category: PlatformCategory;
+  status: "connected" | "available" | "beta";
+}
+
+const PLATFORMS: Platform[] = [
+  // Crypto / exchange
+  { id: "coinbase",    name: "Coinbase",       category: "crypto",    status: "available" },
+  { id: "kraken",      name: "Kraken",         category: "crypto",    status: "available" },
+  { id: "binance",     name: "Binance",        category: "crypto",    status: "available" },
+  { id: "crypto-com",  name: "Crypto.com",     category: "crypto",    status: "beta"      },
+  // Payment gateways
+  { id: "stripe",      name: "Stripe",         category: "payment",   status: "connected" },
+  { id: "paypal",      name: "PayPal",         category: "payment",   status: "available" },
+  { id: "apple-pay",   name: "Apple Pay",      category: "payment",   status: "available" },
+  { id: "google-pay",  name: "Google Pay",     category: "payment",   status: "available" },
+  { id: "cashapp",     name: "Cash App",       category: "payment",   status: "available" },
+  { id: "venmo",       name: "Venmo",          category: "payment",   status: "available" },
+  { id: "square",      name: "Square",         category: "payment",   status: "available" },
+  { id: "klarna",      name: "Klarna",         category: "payment",   status: "beta"      },
+  // Social / advertising platforms
+  { id: "tiktok",      name: "TikTok",         category: "social",    status: "available" },
+  { id: "facebook",    name: "Facebook / Meta",category: "social",    status: "available" },
+  { id: "instagram",   name: "Instagram",      category: "social",    status: "available" },
+  { id: "twitter",     name: "X (Twitter)",    category: "social",    status: "available" },
+  { id: "youtube",     name: "YouTube",        category: "social",    status: "available" },
+  { id: "linkedin",    name: "LinkedIn",       category: "social",    status: "available" },
+  { id: "snapchat",    name: "Snapchat",       category: "social",    status: "beta"      },
+  { id: "pinterest",   name: "Pinterest",      category: "social",    status: "available" },
+  // E-commerce
+  { id: "shopify",     name: "Shopify",        category: "ecommerce", status: "available" },
+  { id: "woocommerce", name: "WooCommerce",    category: "ecommerce", status: "available" },
+  { id: "amazon",      name: "Amazon Pay",     category: "ecommerce", status: "available" },
+];
+
+const statusIcon = (s: Platform["status"]) =>
+  s === "connected" ? "✓" : s === "beta" ? "β" : "○";
+
+const CATEGORY_LABELS: Record<PlatformCategory, string> = {
+  crypto:    "Crypto / Exchange",
+  payment:   "Payment Gateways",
+  social:    "Social & Advertising",
+  ecommerce: "E-Commerce",
+};
+
 // ─── Built-in commands ────────────────────────────────────────────────────────
 
 const COMMANDS: Record<string, (args: string[]) => string[]> = {
   help: () => [
     "Available commands:",
-    "  help              Show this help message",
-    "  about             About Jupiter Command",
-    "  agents            List registered agents",
-    "  run <agent>       Run a specific agent",
-    "  status            Show system status",
-    "  logs [agent]      View recent logs",
-    "  config            Show current configuration",
-    "  clear             Clear the terminal",
-    "  version           Show version info",
+    "  help                     Show this help message",
+    "  about                    About Jupiter Command",
+    "  agents                   List registered agents",
+    "  run <agent>              Run a specific agent",
+    "  platforms [category]     List payment & social platforms",
+    "  connect <platform>       Connect a platform integration",
+    "  disconnect <platform>    Disconnect a platform integration",
+    "  status                   Show system status",
+    "  logs [agent]             View recent logs",
+    "  config                   Show current configuration",
+    "  clear                    Clear the terminal",
+    "  version                  Show version info",
   ],
   about: () => [
     "Jupiter Command v1.0.0",
@@ -31,7 +85,7 @@ const COMMANDS: Record<string, (args: string[]) => string[]> = {
     "A unified command interface for orchestrating AI",
     "coding agents using the AGENTS.md specification.",
     "",
-    "Built on top of the open AGENTS.md format.",
+    "Supports 22+ payment & social platform integrations.",
     "Learn more: https://agents.md",
   ],
   version: () => [
@@ -48,6 +102,68 @@ const COMMANDS: Record<string, (args: string[]) => string[]> = {
     "  ● jules          Jules by Google        [idle]",
     "  ● amp            Amp by Sourcegraph     [idle]",
   ],
+  platforms: (args) => {
+    const filter = args[0]?.toLowerCase() as PlatformCategory | undefined;
+    const categories = (
+      filter ? [filter] : (["crypto", "payment", "social", "ecommerce"] as PlatformCategory[])
+    ).filter((c) => Object.keys(CATEGORY_LABELS).includes(c));
+
+    if (filter && categories.length === 0) {
+      return [
+        `Error: unknown category '${filter}'.`,
+        "Valid categories: crypto  payment  social  ecommerce",
+      ];
+    }
+
+    const lines: string[] = [`Platform integrations (${PLATFORMS.length} total):`, ""];
+    for (const cat of categories) {
+      lines.push(`  ── ${CATEGORY_LABELS[cat]} ──`);
+      PLATFORMS.filter((p) => p.category === cat).forEach((p) => {
+        const icon = statusIcon(p.status);
+        const tag  = p.status === "connected" ? "[connected]" : p.status === "beta" ? "[beta]" : "[available]";
+        lines.push(`  ${icon}  ${p.id.padEnd(14)} ${p.name.padEnd(20)} ${tag}`);
+      });
+      lines.push("");
+    }
+    lines.push("Run `connect <platform-id>` to enable an integration.");
+    return lines;
+  },
+  connect: (args) => {
+    const id = args[0]?.toLowerCase();
+    if (!id) return ["Usage: connect <platform-id>", "Run `platforms` to see available IDs."];
+    const platform = PLATFORMS.find((p) => p.id === id);
+    if (!platform) {
+      return [
+        `Error: platform '${id}' not found.`,
+        "Run `platforms` to see all available platform IDs.",
+      ];
+    }
+    if (platform.status === "connected") {
+      return [`${platform.name} is already connected. ✓`];
+    }
+    return [
+      `Connecting to ${platform.name}…`,
+      `  Validating API credentials…`,
+      `  Establishing secure channel…`,
+      `✓ ${platform.name} connected successfully.`,
+      `  Run \`platforms\` to verify the updated status.`,
+    ];
+  },
+  disconnect: (args) => {
+    const id = args[0]?.toLowerCase();
+    if (!id) return ["Usage: disconnect <platform-id>", "Run `platforms` to see active IDs."];
+    const platform = PLATFORMS.find((p) => p.id === id);
+    if (!platform) {
+      return [
+        `Error: platform '${id}' not found.`,
+        "Run `platforms` to see all available platform IDs.",
+      ];
+    }
+    return [
+      `Disconnecting ${platform.name}…`,
+      `✓ ${platform.name} disconnected.`,
+    ];
+  },
   status: () => [
     "System Status",
     "─────────────────────────────────────────────────",
@@ -56,9 +172,10 @@ const COMMANDS: Record<string, (args: string[]) => string[]> = {
     "  Log store       ✓ online",
     "  Config service  ✓ online",
     "",
-    "  Active agents:  1 / 4",
-    "  Queued tasks:   3",
-    "  Completed:      47 today",
+    "  Active agents:     1 / 4",
+    "  Connected platforms: " + PLATFORMS.filter((p) => p.status === "connected").length + " / " + PLATFORMS.length,
+    "  Queued tasks:      3",
+    "  Completed today:   47",
   ],
   config: () => [
     "Current configuration:",
@@ -110,10 +227,11 @@ const COMMANDS: Record<string, (args: string[]) => string[]> = {
 // ─── Quick-action shortcuts ───────────────────────────────────────────────────
 
 const QUICK_ACTIONS = [
-  { label: "agents", icon: "⬡", description: "List agents" },
-  { label: "status", icon: "◎", description: "System status" },
-  { label: "logs", icon: "≡", description: "View logs" },
-  { label: "help", icon: "?", description: "Help" },
+  { label: "agents",    icon: "⬡", description: "List agents" },
+  { label: "platforms", icon: "⊞", description: "List integrations" },
+  { label: "status",    icon: "◎", description: "System status" },
+  { label: "logs",      icon: "≡", description: "View logs" },
+  { label: "help",      icon: "?", description: "Help" },
 ];
 
 // ─── Component ────────────────────────────────────────────────────────────────
