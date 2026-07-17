@@ -93,7 +93,11 @@ export default function JupiterPage() {
             </div>
 
             {/* Payment destination banner */}
-            <div className="flex items-center gap-3 px-4 py-3 rounded-lg border border-green-200 dark:border-green-800 bg-green-50 dark:bg-green-950/40">
+            <div
+              role="status"
+              aria-label="Active payment destination: $julianshadell"
+              className="flex items-center gap-3 px-4 py-3 rounded-lg border border-green-200 dark:border-green-800 bg-green-50 dark:bg-green-950/40"
+            >
               <span className="text-green-600 dark:text-green-400 text-lg" aria-hidden>→</span>
               <div className="flex flex-col gap-0.5">
                 <span className="text-xs font-medium text-green-700 dark:text-green-300 uppercase tracking-wide">
