@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import Head from "next/head";
 import TriangleIcon from "@/components/icons/TriangleIcon";
+import LandLinkNav from "@/components/LandLinkNav";
 
 type NetworkStatus = "scanning" | "connected" | "idle";
 
@@ -67,8 +68,9 @@ export default function LandLink() {
       </Head>
 
       <div className="min-h-screen bg-gray-950 text-white flex flex-col items-center px-4 py-10">
+        <LandLinkNav />
         {/* App Icon / Face */}
-        <div className="flex flex-col items-center gap-3 mb-10">
+        <div className="flex flex-col items-center gap-3 mb-10 mt-8">
           <div className="relative flex items-center justify-center w-24 h-24 rounded-3xl bg-gradient-to-br from-purple-700 to-indigo-900 shadow-lg shadow-purple-900/60">
             <TriangleIcon size={52} color="#ffffff" />
           </div>

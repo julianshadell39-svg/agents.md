@@ -1,0 +1,17 @@
+{
+  "name": "Land Link",
+  "short_name": "LandLink",
+  "description": "Private network for your phone and services",
+  "start_url": "/land-link",
+  "display": "standalone",
+  "background_color": "#0a0a0a",
+  "theme_color": "#4f46e5",
+  "icons": [
+    {
+      "src": "/land-link-icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
